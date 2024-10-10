@@ -2,14 +2,23 @@ const Movie = require('../models/Movies');
 const fs =require('fs');
 
 //Function to get all the files
-exports.getMovies = async(req,res)=>{
-    try{
-        const movies = await Movie.find();
-         res.status(200).json(movies);
-    }
-    catch(e){
-            console.error(e);
-            res.status(500).send('Error retrieving Movies');
+exports.getMovies = async (req, res) => {
+    try {
+        const { title } = req.query;
+        let movies;
+
+        if (title) {
+            // Search for movies with titles that match the query (case-insensitive)
+            movies = await Movie.find({ title: { $regex: title, $options: 'i' } });
+        } else {
+            // If no query parameter is provided, return all movies
+            movies = await Movie.find();
+        }
+
+        res.status(200).json(movies);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error retrieving Movies');
     }
 };
 
