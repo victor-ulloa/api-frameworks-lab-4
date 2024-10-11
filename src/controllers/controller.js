@@ -2,18 +2,29 @@ const Movie = require('../models/Movies');
 const fs =require('fs');
 
 //Function to get all the files
+//search functionality
 exports.getMovies = async (req, res) => {
     try {
-        const { title } = req.query;
-        let movies;
+        const { title, genre, year } = req.query;
+        let filter = {};
 
+        // Add title to the filter if provided
         if (title) {
-            // Search for movies with titles that match the query (case-insensitive)
-            movies = await Movie.find({ title: { $regex: title, $options: 'i' } });
-        } else {
-            // If no query parameter is provided, return all movies
-            movies = await Movie.find();
+            filter.title = { $regex: title, $options: 'i' };
         }
+
+        // Add genre to the filter if provided
+        if (genre) {
+            filter.genres = { $regex: genre, $options: 'i' }; // Case-insensitive match for genres
+        }
+
+        // Add year to the filter if provided
+        if (year) {
+            filter.year = year;
+        }
+
+        // Find movies based on the filter criteria
+        const movies = await Movie.find(filter);
 
         res.status(200).json(movies);
     } catch (e) {
